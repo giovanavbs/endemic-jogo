@@ -40,7 +40,7 @@ function bindDecks(){
     btn.setAttribute('aria-expanded','true');
     btn.querySelector('strong').textContent='−';
     if(deckTimers.has(id))clearTimeout(deckTimers.get(id));
-    deckTimers.set(id,setTimeout(()=>closeDeck(deck),5000));
+    deckTimers.set(id,setTimeout(()=>closeDeck(deck),3000));
   }));
 }
 function renderRole(player,v){
