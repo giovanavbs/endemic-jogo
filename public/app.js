@@ -5,7 +5,7 @@ const deckTimers = new Map();
 const $=s=>document.querySelector(s);
 async function api(action, options={}){const r=await fetch('/api/game?action='+encodeURIComponent(action),{...options,headers:{'Content-Type':'application/json',...(options.headers||{})}});let d={};try{d=await r.json()}catch{}if(!r.ok)throw new Error(d.error||`Erro ${r.status}`);return d}
 function showError(msg){const x=$('#offline');x.textContent=msg;x.classList.remove('hidden')}
-function renderCounts(s){$('#counts').textContent=`Magistradas ${s.counts.magistrada}/2 · Infiltrados ${s.counts.infiltrado}/4 · Mascarados ${s.counts.mascarado}/10`;$('#round').textContent=s.round||'—'}
+function renderCounts(s){$('#counts').textContent=`Deusas ${s.counts.magistrada}/2 · Infiltrados ${s.counts.infiltrado}/4 · Mascarados ${s.counts.mascarado}/10`;$('#round').textContent=s.round||'—'}
 async function refresh(){try{const s=await api('state');renderCounts(s);if(!s.active&&!playerId)return;if(playerId){const d=await api('role-view',{method:'POST',body:JSON.stringify({playerId})});renderCounts(d.state);if(d.player) renderRole(d.player,d.roleView)}}catch(e){if(!playerId)showError('O jogo ainda não está disponível. O ADM precisa iniciar uma rodada.')}}
 function renderDecks(decks){
   if(!decks?.length)return '';
