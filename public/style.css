@@ -6,3 +6,7 @@
 .mag-guess-list{display:grid;gap:12px}.mag-guess-admin{border:1px solid var(--purple);padding:12px}.mag-guess-admin ol{margin:8px 0 0 20px;padding:0}.mag-guess-admin li{color:var(--blue);margin:4px 0}
 
 .admin-status{min-height:24px;margin:8px 0 14px;font-weight:700;letter-spacing:.03em}.admin-status.success{color:#75f3bd}.admin-status.error{color:#ff7d9d}
+
+.event-deck{margin-top:10px;color:var(--pink);font-size:12px;font-weight:700;letter-spacing:1px}
+.admin-help-icon{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:2px solid var(--blue);border-radius:50%;color:var(--blue);font-family:'Archivo Black',sans-serif;font-size:18px;text-decoration:none;transition:.15s}
+.admin-help-icon:hover{transform:translate(-2px,-2px);box-shadow:3px 3px 0 var(--pink);color:var(--pink);border-color:var(--pink)}
