@@ -4,3 +4,5 @@
 .guess-title{color:var(--pink);font-weight:700;letter-spacing:1.5px;margin:18px 0 12px}.mag-guess{margin-bottom:10px}#magGuessStatus{margin-top:10px;color:var(--blue)}
 
 .mag-guess-list{display:grid;gap:12px}.mag-guess-admin{border:1px solid var(--purple);padding:12px}.mag-guess-admin ol{margin:8px 0 0 20px;padding:0}.mag-guess-admin li{color:var(--blue);margin:4px 0}
+
+.admin-status{min-height:24px;margin:8px 0 14px;font-weight:700;letter-spacing:.03em}.admin-status.success{color:#75f3bd}.admin-status.error{color:#ff7d9d}
