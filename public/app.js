@@ -8,7 +8,7 @@ function showError(msg){const x=$('#offline');x.textContent=msg;x.classList.remo
 function renderCounts(s){$('#counts').textContent=`Deusas ${s.counts.magistrada}/2 · Infiltrados ${s.counts.infiltrado}/4 · Mascarados ${s.counts.mascarado}/10`;$('#round').textContent=s.round||'—'}
 async function refresh(){try{const s=await api('state');renderCounts(s);
   if(s.finished && playerId){
-    showFinishModal();
+    showFinishModal(s.answer);
     return;
   }
   if(!s.active && playerId){
@@ -95,11 +95,15 @@ function renderRole(player,v){
 for(const b of document.querySelectorAll('[data-role]'))b.addEventListener('click',async()=>{try{const name=$('#name').value.trim();if(!name)return showError('Digite seu nome antes de escolher o cargo.');const d=await api('join',{method:'POST',body:JSON.stringify({name,role:b.dataset.role})});playerId=d.playerId;localStorage.setItem('caos_player',playerId);currentViewKey='';renderRole({name,role:b.dataset.role},d.roleView);renderCounts(d.state);showError('');$('#offline').classList.add('hidden')}catch(e){showError(e.message)}});
 $('#sendGuess').addEventListener('click',async()=>{try{const guess=$('#guess').value.trim();if(!guess)return $('#guessStatus').textContent='Escreva seu chute primeiro.';await api('guess',{method:'POST',body:JSON.stringify({playerId,guess})});$('#guessStatus').textContent='✓ Chute registrado para o ADM.'}catch(e){$('#guessStatus').textContent=e.message}});
 $('#sendMagGuess').addEventListener('click',async()=>{try{const guesses=[...document.querySelectorAll('.mag-guess')].map(x=>x.value.trim());if(guesses.some(x=>!x))return $('#magGuessStatus').textContent='Preencha os 4 nomes dos infiltrados.';await api('magistrada-guess',{method:'POST',body:JSON.stringify({playerId,guesses})});$('#magGuessStatus').textContent='✓ Palpite dos 4 infiltrados registrado para o ADM.'}catch(e){$('#magGuessStatus').textContent=e.message}});
-function showFinishModal(){
+function showFinishModal(answer){
   $('#game').classList.add('hidden');
   $('#lobby').classList.add('hidden');
   const modal=$('#finishModal');
-  if(modal) modal.classList.remove('hidden');
+  if(modal) {
+    const answerBox=$('#finishAnswer');
+    if(answerBox) answerBox.textContent=answer ? `A resposta era: ${answer}` : 'A resposta não está disponível.';
+    modal.classList.remove('hidden');
+  }
 }
 function returnToLobby(){
   playerId=null;

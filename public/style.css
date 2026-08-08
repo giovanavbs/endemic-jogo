@@ -20,3 +20,5 @@
 .finish-modal{text-align:center;border-color:var(--pink);max-width:650px;margin:18px auto;padding:32px}
 .finish-modal .finish-icon{font-family:'Archivo Black',sans-serif;font-size:64px;line-height:1;color:var(--pink);text-shadow:4px 4px 0 var(--purple);margin-bottom:10px}
 .finish-modal p{color:var(--muted);margin:0 0 22px}
+
+.finish-answer{margin:18px 0;padding:16px;border:2px dashed var(--blue);color:var(--white);font-size:20px;line-height:1.5;background:rgba(36,200,255,.06)}
