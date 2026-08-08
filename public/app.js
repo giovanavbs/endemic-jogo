@@ -11,6 +11,11 @@ async function refresh(){try{const s=await api('state');renderCounts(s);
     showFinishModal();
     return;
   }
+  if(!s.active && playerId){
+    // A rodada foi resetada antes de ser encerrada: remove o jogador local e volta ao lobby.
+    returnToLobby();
+    return;
+  }
   if(!s.active && !playerId)return;
   if(playerId){
     const d=await api('role-view',{method:'POST',body:JSON.stringify({playerId})});
@@ -93,18 +98,23 @@ $('#sendMagGuess').addEventListener('click',async()=>{try{const guesses=[...docu
 function showFinishModal(){
   $('#game').classList.add('hidden');
   $('#lobby').classList.add('hidden');
-  $('#finishModal').classList.remove('hidden');
+  const modal=$('#finishModal');
+  if(modal) modal.classList.remove('hidden');
 }
 function returnToLobby(){
   playerId=null;
   localStorage.removeItem('caos_player');
   currentViewKey='';
-  $('#finishModal').classList.add('hidden');
+  const modal=$('#finishModal');
+  if(modal) modal.classList.add('hidden');
   $('#game').classList.add('hidden');
   $('#lobby').classList.remove('hidden');
+  $('#name').value='';
   showError('');
   $('#offline').classList.add('hidden');
 }
-$('#returnLobby').addEventListener('click',returnToLobby);
-$('#leave').addEventListener('click',returnToLobby);
+const returnLobbyBtn=$('#returnLobby');
+if(returnLobbyBtn) returnLobbyBtn.addEventListener('click',returnToLobby);
+const leaveBtn=$('#leave');
+if(leaveBtn) leaveBtn.addEventListener('click',returnToLobby);
 refresh();timer=setInterval(refresh,1500);
