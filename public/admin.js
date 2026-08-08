@@ -15,4 +15,7 @@ function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;',
 $('#start').onclick=async()=>{if(!confirm('Iniciar uma nova rodada? A rodada atual e seus jogadores serão substituídos.'))return;try{await req('/api/game?action=start',{method:'POST'});setStatus('✓ Nova rodada iniciada.','success');refresh()}catch(e){setStatus(e.message,'error')}};
 $('#finish').onclick=async()=>{if(!confirm('Encerrar a rodada atual? Os jogadores não poderão mais acessar as informações desta rodada.'))return;try{await req('/api/game?action=finish',{method:'POST'});setStatus('✓ Rodada encerrada. Clique em “INICIAR NOVO JOGO” para começar a próxima rodada.','success');refresh()}catch(e){setStatus(e.message,'error')}};
 
+
+$('#resetRound').onclick=async()=>{if(!confirm('Resetar somente a rodada atual? A rodada será reduzida em 1, os jogadores e o evento serão apagados.'))return;try{await req('/api/game?action=reset-round',{method:'POST'});setStatus('✓ Rodada atual resetada.','success');refresh()}catch(e){setStatus(e.message,'error')}};
+
 $('#reset').onclick=async()=>{if(!confirm('Resetar completamente o jogo e voltar a rodada para ZERO? Isso apagará os jogadores e o evento atual.'))return;try{await req('/api/game?action=reset',{method:'POST'});setStatus('✓ Jogo resetado. A próxima rodada começará no número 1.','success');refresh()}catch(e){setStatus(e.message,'error')}};

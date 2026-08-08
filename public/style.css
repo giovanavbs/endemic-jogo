@@ -10,3 +10,9 @@
 .event-deck{margin-top:10px;color:var(--pink);font-size:12px;font-weight:700;letter-spacing:1px}
 .admin-help-icon{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:2px solid var(--blue);border-radius:50%;color:var(--blue);font-family:'Archivo Black',sans-serif;font-size:18px;text-decoration:none;transition:.15s}
 .admin-help-icon:hover{transform:translate(-2px,-2px);box-shadow:3px 3px 0 var(--pink);color:var(--pink);border-color:var(--pink)}
+
+.finish-modal{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.88);backdrop-filter:blur(5px)}
+.finish-modal-card{width:min(620px,92vw);background:#0d0d0d;border:2px solid var(--pink);box-shadow:9px 9px 0 rgba(123,44,255,.45),-5px -5px 0 rgba(36,200,255,.18);padding:32px;text-align:center}
+.finish-modal-kicker{color:var(--pink);font-size:11px;font-weight:700;letter-spacing:2px;margin-bottom:12px}
+.finish-modal-card h2{font-family:'Archivo Black',sans-serif;color:var(--blue);font-size:clamp(30px,7vw,58px);margin:8px 0 18px}
+.finish-modal-card p{color:var(--muted);line-height:1.7;margin:0 0 24px}

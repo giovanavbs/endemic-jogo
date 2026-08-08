@@ -39,6 +39,24 @@ module.exports = async function handler(req, res) {
       return res.status(200).json(publicState(game));
     }
 
+    if (action === 'reset-round') {
+      if (!requireAdmin(req)) return res.status(401).json({ error:'Não autorizado.' });
+      if (!game) return res.status(400).json({ error:'Nenhuma rodada iniciada.' });
+      const previousRound = Math.max(0, (game.round || 0) - 1);
+      game = {
+        active:false,
+        finished:false,
+        round:previousRound,
+        startedAt:null,
+        event:null,
+        players:[],
+        winner:null,
+        magistradaGuesses:{}
+      };
+      await saveGame(game);
+      return res.status(200).json(publicState(game));
+    }
+
     if (action === 'join') {
       if (!game?.active) return res.status(400).json({ error:'O ADM ainda não iniciou uma rodada.' });
       const body = parseBody(req);

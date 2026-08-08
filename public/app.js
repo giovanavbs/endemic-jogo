@@ -6,7 +6,18 @@ const $=s=>document.querySelector(s);
 async function api(action, options={}){const r=await fetch('/api/game?action='+encodeURIComponent(action),{...options,headers:{'Content-Type':'application/json',...(options.headers||{})}});let d={};try{d=await r.json()}catch{}if(!r.ok)throw new Error(d.error||`Erro ${r.status}`);return d}
 function showError(msg){const x=$('#offline');x.textContent=msg;x.classList.remove('hidden')}
 function renderCounts(s){$('#counts').textContent=`Deusas ${s.counts.magistrada}/2 · Infiltrados ${s.counts.infiltrado}/4 · Mascarados ${s.counts.mascarado}/10`;$('#round').textContent=s.round||'—'}
-async function refresh(){try{const s=await api('state');renderCounts(s);if(!s.active&&!playerId)return;if(playerId){const d=await api('role-view',{method:'POST',body:JSON.stringify({playerId})});renderCounts(d.state);if(d.player) renderRole(d.player,d.roleView)}}catch(e){if(!playerId)showError('O jogo ainda não está disponível. O ADM precisa iniciar uma rodada.')}}
+async function refresh(){try{const s=await api('state');renderCounts(s);
+  if(s.finished && playerId){
+    showFinishModal();
+    return;
+  }
+  if(!s.active && !playerId)return;
+  if(playerId){
+    const d=await api('role-view',{method:'POST',body:JSON.stringify({playerId})});
+    renderCounts(d.state);
+    if(d.player) renderRole(d.player,d.roleView);
+  }
+}catch(e){if(!playerId)showError('O jogo ainda não está disponível. O ADM precisa iniciar uma rodada.')}}
 function renderDecks(decks){
   if(!decks?.length)return '';
   return `<div class="decks"><div class="deck-intro">ABRA UM BARALHO PARA VER AS OPÇÕES — ELE FECHA APÓS 3 SEGUNDOS</div>${decks.map(d=>`
@@ -79,5 +90,21 @@ function renderRole(player,v){
 for(const b of document.querySelectorAll('[data-role]'))b.addEventListener('click',async()=>{try{const name=$('#name').value.trim();if(!name)return showError('Digite seu nome antes de escolher o cargo.');const d=await api('join',{method:'POST',body:JSON.stringify({name,role:b.dataset.role})});playerId=d.playerId;localStorage.setItem('caos_player',playerId);currentViewKey='';renderRole({name,role:b.dataset.role},d.roleView);renderCounts(d.state);showError('');$('#offline').classList.add('hidden')}catch(e){showError(e.message)}});
 $('#sendGuess').addEventListener('click',async()=>{try{const guess=$('#guess').value.trim();if(!guess)return $('#guessStatus').textContent='Escreva seu chute primeiro.';await api('guess',{method:'POST',body:JSON.stringify({playerId,guess})});$('#guessStatus').textContent='✓ Chute registrado para o ADM.'}catch(e){$('#guessStatus').textContent=e.message}});
 $('#sendMagGuess').addEventListener('click',async()=>{try{const guesses=[...document.querySelectorAll('.mag-guess')].map(x=>x.value.trim());if(guesses.some(x=>!x))return $('#magGuessStatus').textContent='Preencha os 4 nomes dos infiltrados.';await api('magistrada-guess',{method:'POST',body:JSON.stringify({playerId,guesses})});$('#magGuessStatus').textContent='✓ Palpite dos 4 infiltrados registrado para o ADM.'}catch(e){$('#magGuessStatus').textContent=e.message}});
-$('#leave').addEventListener('click',()=>{playerId=null;localStorage.removeItem('caos_player');location.reload()});
+function showFinishModal(){
+  $('#game').classList.add('hidden');
+  $('#lobby').classList.add('hidden');
+  $('#finishModal').classList.remove('hidden');
+}
+function returnToLobby(){
+  playerId=null;
+  localStorage.removeItem('caos_player');
+  currentViewKey='';
+  $('#finishModal').classList.add('hidden');
+  $('#game').classList.add('hidden');
+  $('#lobby').classList.remove('hidden');
+  showError('');
+  $('#offline').classList.add('hidden');
+}
+$('#returnLobby').addEventListener('click',returnToLobby);
+$('#leave').addEventListener('click',returnToLobby);
 refresh();timer=setInterval(refresh,1500);
