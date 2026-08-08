@@ -9,7 +9,7 @@ function renderCounts(s){$('#counts').textContent=`Magistradas ${s.counts.magist
 async function refresh(){try{const s=await api('state');renderCounts(s);if(!s.active&&!playerId)return;if(playerId){const d=await api('role-view',{method:'POST',body:JSON.stringify({playerId})});renderCounts(d.state);if(d.player) renderRole(d.player,d.roleView)}}catch(e){if(!playerId)showError('O jogo ainda não está disponível. O ADM precisa iniciar uma rodada.')}}
 function renderDecks(decks){
   if(!decks?.length)return '';
-  return `<div class="decks"><div class="deck-intro">ABRA UM BARALHO PARA VER AS OPÇÕES — ELE FECHA APÓS 5 SEGUNDOS</div>${decks.map(d=>`
+  return `<div class="decks"><div class="deck-intro">ABRA UM BARALHO PARA VER AS OPÇÕES — ELE FECHA APÓS 3 SEGUNDOS</div>${decks.map(d=>`
     <div class="deck" data-deck-id="${d.id}">
       <button class="deck-toggle" type="button" aria-expanded="false">
         <span><b>${d.title}</b><small>${d.subtitle}</small></span><strong>＋</strong>
