@@ -12,7 +12,7 @@ async function refresh(){try{const s=await api('state');renderCounts(s);
     return;
   }
   if(!s.active && playerId){
-    // A rodada foi resetada antes de ser encerrada: remove o jogador local e volta ao lobby.
+    
     returnToLobby();
     return;
   }
