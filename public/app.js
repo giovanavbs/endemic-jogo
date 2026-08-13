@@ -1,12 +1,18 @@
 let playerId = localStorage.getItem('caos_player');
 let timer;
 let currentViewKey = '';
+let lastAdminJoinNotice = Number(localStorage.getItem('caos_admin_join_notice') || 0);
 const deckTimers = new Map();
 const $=s=>document.querySelector(s);
 async function api(action, options={}){const r=await fetch('/api/game?action='+encodeURIComponent(action),{...options,headers:{'Content-Type':'application/json',...(options.headers||{})}});let d={};try{d=await r.json()}catch{}if(!r.ok)throw new Error(d.error||`Erro ${r.status}`);return d}
 function showError(msg){const x=$('#offline');x.textContent=msg;x.classList.remove('hidden')}
-function renderCounts(s){$('#counts').textContent=`Deusas ${s.counts.magistrada}/2 · Infiltrados ${s.counts.infiltrado}/4 · Mascarados ${s.counts.mascarado}/10`;$('#round').textContent=s.round||'—'}
+function renderCounts(s){const l=s.limits||s.settings?.roleLimits||{magistrada:2,infiltrado:4,mascarado:10};$('#counts').textContent=`Deusas ${s.counts.magistrada}/${l.magistrada} · Infiltrados ${s.counts.infiltrado}/${l.infiltrado} · Mascarados ${s.counts.mascarado}/${l.mascarado}`;document.querySelector('[data-role=magistrada] small').textContent=`${l.magistrada} vagas`;document.querySelector('[data-role=infiltrado] small').textContent=`${l.infiltrado} vagas`;document.querySelector('[data-role=mascarado] small').textContent=`${l.mascarado} vagas`;$('#round').textContent=s.round||'—'}
 async function refresh(){try{const s=await api('state');renderCounts(s);
+  if(s.adminJoinNotice?.at && s.adminJoinNotice.at > lastAdminJoinNotice){
+    lastAdminJoinNotice = s.adminJoinNotice.at;
+    localStorage.setItem('caos_admin_join_notice', String(lastAdminJoinNotice));
+    showAdminJoinModal(s.adminJoinNotice.name);
+  }
   if(s.finished && playerId){
     showFinishModal(s.answer);
     return;
@@ -95,6 +101,17 @@ function renderRole(player,v){
 for(const b of document.querySelectorAll('[data-role]'))b.addEventListener('click',async()=>{try{const name=$('#name').value.trim();if(!name)return showError('Digite seu nome antes de escolher o cargo.');const d=await api('join',{method:'POST',body:JSON.stringify({name,role:b.dataset.role})});playerId=d.playerId;localStorage.setItem('caos_player',playerId);currentViewKey='';renderRole({name,role:b.dataset.role},d.roleView);renderCounts(d.state);showError('');$('#offline').classList.add('hidden')}catch(e){showError(e.message)}});
 $('#sendGuess').addEventListener('click',async()=>{try{const guess=$('#guess').value.trim();if(!guess)return $('#guessStatus').textContent='Escreva seu chute primeiro.';await api('guess',{method:'POST',body:JSON.stringify({playerId,guess})});$('#guessStatus').textContent='✓ Chute registrado para o ADM.'}catch(e){$('#guessStatus').textContent=e.message}});
 $('#sendMagGuess').addEventListener('click',async()=>{try{const guesses=[...document.querySelectorAll('.mag-guess')].map(x=>x.value.trim());if(guesses.some(x=>!x))return $('#magGuessStatus').textContent='Preencha os 4 nomes dos infiltrados.';await api('magistrada-guess',{method:'POST',body:JSON.stringify({playerId,guesses})});$('#magGuessStatus').textContent='✓ Palpite dos 4 infiltrados registrado para o ADM.'}catch(e){$('#magGuessStatus').textContent=e.message}});
+function showAdminJoinModal(name){
+  const modal=$('#adminJoinModal');
+  if(!modal)return;
+  const nameBox=$('#adminJoinName');
+  if(nameBox)nameBox.textContent=name||'O ADM';
+  modal.classList.remove('hidden');
+}
+function hideAdminJoinModal(){
+  const modal=$('#adminJoinModal');
+  if(modal)modal.classList.add('hidden');
+}
 function showFinishModal(answer){
   $('#game').classList.add('hidden');
   $('#lobby').classList.add('hidden');
@@ -117,6 +134,8 @@ function returnToLobby(){
   showError('');
   $('#offline').classList.add('hidden');
 }
+const adminJoinOk=$('#adminJoinOk');
+if(adminJoinOk)adminJoinOk.addEventListener('click',hideAdminJoinModal);
 const returnLobbyBtn=$('#returnLobby');
 if(returnLobbyBtn) returnLobbyBtn.addEventListener('click',returnToLobby);
 const leaveBtn=$('#leave');

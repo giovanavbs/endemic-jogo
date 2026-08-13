@@ -22,3 +22,10 @@
 .finish-modal p{color:var(--muted);margin:0 0 22px}
 
 .finish-answer{margin:18px 0;padding:16px;border:2px dashed var(--blue);color:var(--white);font-size:20px;line-height:1.5;background:rgba(36,200,255,.06)}
+
+.admin-join-modal{position:fixed!important;inset:0!important;z-index:1100!important;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);max-width:none!important;margin:0!important;border:0!important;box-shadow:none!important;padding:24px!important}
+.admin-join-card{width:min(620px,92vw);background:#0d0d0d;border:2px solid var(--pink);box-shadow:9px 9px 0 rgba(123,44,255,.45),-5px -5px 0 rgba(36,200,255,.18);padding:32px;text-align:center}
+.admin-join-card h2{font-family:'Archivo Black',sans-serif;color:var(--blue);font-size:clamp(26px,6vw,48px);margin:8px 0 18px;line-height:1}
+.admin-join-card p{color:var(--muted);line-height:1.7;margin:0 0 24px}
+
+.admin-settings{margin:18px 0}.setting-toggle{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--white);cursor:pointer}.setting-toggle input{width:auto;margin:0;accent-color:var(--pink);transform:scale(1.15)}.setting-help{color:var(--muted);font-size:12px;line-height:1.6}.role-limits{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}.role-limits label{color:var(--pink);font-weight:700;font-size:11px;letter-spacing:1px}.role-limits input{margin-top:7px;margin-bottom:0}.admin-settings #saveSettings{margin-top:4px}.event-deck{margin-top:10px;color:var(--pink);font-size:12px;font-weight:700;letter-spacing:.06em}@media(max-width:700px){.role-limits{grid-template-columns:1fr}}

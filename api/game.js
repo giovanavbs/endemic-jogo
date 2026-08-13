@@ -1,4 +1,4 @@
-const { ROLES, makeEvent, getGame, saveGame, publicState, roleView, parseBody, requireAdmin } = require('../lib/game');
+const { ROLES, DEFAULT_ROLE_LIMITS, makeEvent, getGame, saveGame, publicState, roleView, parseBody, requireAdmin, adminSessionId, getSettings } = require('../lib/game');
 
 function id() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
 
@@ -19,9 +19,35 @@ module.exports = async function handler(req, res) {
     if (action === 'start') {
       if (!requireAdmin(req)) return res.status(401).json({ error:'Não autorizado.' });
       const previousRound = game?.round || 0;
-      game = { active:true, finished:false, round:previousRound+1, startedAt:Date.now(), event:makeEvent(), players:[], winner:null, magistradaGuesses:{} };
+      const settings = getSettings(game);
+      game = { active:true, finished:false, round:previousRound+1, startedAt:Date.now(), event:makeEvent(), players:[], winner:null, magistradaGuesses:{}, startedByAdminSession:adminSessionId(req), adminJoinNotice:null, settings };
       await saveGame(game);
       return res.status(200).json(publicState(game));
+    }
+
+    if (action === 'settings') {
+      if (!requireAdmin(req)) return res.status(401).json({ error:'Não autorizado.' });
+      const body = parseBody(req);
+      const current = getSettings(game);
+      const warning = body.adminJoinWarning === undefined ? current.adminJoinWarning : !!body.adminJoinWarning;
+      const roleLimits = { ...current.roleLimits };
+      const requested = body.roleLimits || {};
+      for (const role of Object.keys(DEFAULT_ROLE_LIMITS)) {
+        if (requested[role] !== undefined) {
+          const value = Number(requested[role]);
+          if (!Number.isInteger(value) || value < DEFAULT_ROLE_LIMITS[role] || value > 100) {
+            return res.status(400).json({ error:`O limite de ${role} deve estar entre ${DEFAULT_ROLE_LIMITS[role]} e 100.` });
+          }
+          const currentCount = game?.players?.filter(p => p.role === role).length || 0;
+          if (value < currentCount) return res.status(400).json({ error:`Não é possível colocar ${role} em ${value} enquanto existem ${currentCount} jogadores desse cargo na rodada atual.` });
+          roleLimits[role] = value;
+        }
+      }
+      const settings = { adminJoinWarning: warning, roleLimits };
+      if (!game) game = { active:false, finished:false, round:0, startedAt:null, event:null, players:[], winner:null, magistradaGuesses:{}, startedByAdminSession:null, adminJoinNotice:null, settings };
+      else game.settings = settings;
+      await saveGame(game);
+      return res.status(200).json({ ok:true, settings });
     }
 
     if (action === 'finish') {
@@ -34,7 +60,7 @@ module.exports = async function handler(req, res) {
 
     if (action === 'reset') {
       if (!requireAdmin(req)) return res.status(401).json({ error:'Não autorizado.' });
-      game = { active:false, finished:false, round:0, startedAt:null, event:null, players:[], winner:null, magistradaGuesses:{} };
+      game = { active:false, finished:false, round:0, startedAt:null, event:null, players:[], winner:null, magistradaGuesses:{}, startedByAdminSession:null, adminJoinNotice:null, settings:getSettings(game) };
       await saveGame(game);
       return res.status(200).json(publicState(game));
     }
@@ -51,7 +77,10 @@ module.exports = async function handler(req, res) {
         event:null,
         players:[],
         winner:null,
-        magistradaGuesses:{}
+        magistradaGuesses:{},
+        startedByAdminSession:null,
+        adminJoinNotice:null,
+        settings:getSettings(game)
       };
       await saveGame(game);
       return res.status(200).json(publicState(game));
@@ -64,10 +93,16 @@ module.exports = async function handler(req, res) {
       const role = String(body.role || '').trim();
       if (!name) return res.status(400).json({ error:'Digite seu nome.' });
       if (!ROLES[role]) return res.status(400).json({ error:'Escolha um cargo.' });
+      const limits = getSettings(game).roleLimits;
       const count = game.players.filter(p => p.role === role).length;
-      if (count >= ROLES[role]) return res.status(409).json({ error:'Esse cargo já está cheio.' });
-      const player = { id:id(), name, role, guess:null, joinedAt:Date.now() };
+      if (count >= limits[role]) return res.status(409).json({ error:'Esse cargo já está cheio.' });
+      const currentAdminSession = adminSessionId(req);
+      const isRoundAdmin = !!currentAdminSession && currentAdminSession === game.startedByAdminSession;
+      const player = { id:id(), name, role, guess:null, joinedAt:Date.now(), isAdminPlayer:isRoundAdmin };
       game.players.push(player);
+      if (isRoundAdmin && getSettings(game).adminJoinWarning) {
+        game.adminJoinNotice = { at: Date.now(), name };
+      }
       await saveGame(game);
       return res.status(200).json({ playerId:player.id, roleView:roleView(game, role, player.id), state:publicState(game) });
     }
