@@ -1,8 +1,8 @@
 {
-  "name": "anfitriao-caotico",
+  "name": "caos-game",
   "version": "3.0.0",
   "private": true,
-  "description": "Jogo Anfitrião Caótico - versão pronta para Vercel + Upstash Redis",
+  "description": "Jogo do Caos - versão Vercel + Upstash Redis",
   "scripts": {
     "dev": "vercel dev"
   },
