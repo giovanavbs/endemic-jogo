@@ -1,17 +1,20 @@
 let playerId = localStorage.getItem('caos_player');
 let timer;
 let currentViewKey = '';
-let lastAdminJoinNotice = Number(localStorage.getItem('caos_admin_join_notice') || 0);
+let lastAdminJoinNotice = localStorage.getItem('caos_admin_join_notice') || '';
 const deckTimers = new Map();
 const $=s=>document.querySelector(s);
 async function api(action, options={}){const r=await fetch('/api/game?action='+encodeURIComponent(action),{...options,headers:{'Content-Type':'application/json',...(options.headers||{})}});let d={};try{d=await r.json()}catch{}if(!r.ok)throw new Error(d.error||`Erro ${r.status}`);return d}
 function showError(msg){const x=$('#offline');x.textContent=msg;x.classList.remove('hidden')}
 function renderCounts(s){const l=s.limits||s.settings?.roleLimits||{magistrada:2,infiltrado:4,mascarado:10};$('#counts').textContent=`Deusas ${s.counts.magistrada}/${l.magistrada} · Infiltrados ${s.counts.infiltrado}/${l.infiltrado} · Mascarados ${s.counts.mascarado}/${l.mascarado}`;document.querySelector('[data-role=magistrada] small').textContent=`${l.magistrada} vagas`;document.querySelector('[data-role=infiltrado] small').textContent=`${l.infiltrado} vagas`;document.querySelector('[data-role=mascarado] small').textContent=`${l.mascarado} vagas`;$('#round').textContent=s.round||'—'}
 async function refresh(){try{const s=await api('state');renderCounts(s);
-  if(s.adminJoinNotice?.at && s.adminJoinNotice.at > lastAdminJoinNotice){
-    lastAdminJoinNotice = s.adminJoinNotice.at;
-    localStorage.setItem('caos_admin_join_notice', String(lastAdminJoinNotice));
-    showAdminJoinModal(s.adminJoinNotice.name);
+  if(s.adminJoinNotice?.at){
+    const noticeId = String(s.adminJoinNotice.id || s.adminJoinNotice.at);
+    if(noticeId !== lastAdminJoinNotice){
+      lastAdminJoinNotice = noticeId;
+      localStorage.setItem('caos_admin_join_notice', noticeId);
+      showAdminJoinModal(s.adminJoinNotice.name);
+    }
   }
   if(s.finished && playerId){
     showFinishModal(s.answer);

@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const { ROLES, DEFAULT_ROLE_LIMITS, makeEvent, getGame, saveGame, publicState, roleView, parseBody, requireAdmin, adminSessionId, getSettings } = require('../lib/game');
 
 function id() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
@@ -101,7 +102,7 @@ module.exports = async function handler(req, res) {
       const player = { id:id(), name, role, guess:null, joinedAt:Date.now(), isAdminPlayer:isRoundAdmin };
       game.players.push(player);
       if (isRoundAdmin && getSettings(game).adminJoinWarning) {
-        game.adminJoinNotice = { at: Date.now(), name };
+        game.adminJoinNotice = { id: (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`), at: Date.now(), name };
       }
       await saveGame(game);
       return res.status(200).json({ playerId:player.id, roleView:roleView(game, role, player.id), state:publicState(game) });
